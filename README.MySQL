@@ -1,0 +1,38 @@
+Instructions for creating a MySQL database
+===============================================
+
+Ofcomverter requires a database to run.  You should create a database 
+and a user especially for the purpose.  The user you create must have 
+SELECT, INSERT and DELETE privileges otherwise the program will not 
+operate correctly.
+
+By default, Ofcomverter uses "ofcomverter" as the database name, so 
+that's what we'll use for the purposes of these instructions.
+
+The database should now be created in the 'UTF-8' character set, not as 
+'Latin-1' as in previous versions.
+
+CREATE DATABASE ofcomverter;
+
+CREATE TABLE `operators` (
+  `code` text NOT NULL,
+  `operator` text,
+  `numberlength` int(11) default NULL,
+  `numberformat` text,
+  `allocated` tinyint(1) default NULL,
+  `protected` tinyint(1) default NULL,
+  `designated` tinyint(1) default NULL,
+  `free` tinyint(1) default NULL,
+  `date` text,
+  `changes` text,
+  `notes` text,
+  `tariff_notes` text
+) ENGINE=MyISAM DEFAULT CHARSET=utf-8;
+
+CREATE TABLE `locations` (
+  `code` text NOT NULL,
+  `location` text,
+  `designated` tinyint(1) default NULL,
+  `notes` text,
+  `date` text
+) ENGINE=MyISAM DEFAULT CHARSET=utf-8;

@@ -1,0 +1,38 @@
+Instructions for creating a PostgreSQL database
+===============================================
+
+Ofcomverter requires a database to run.  You should create a database 
+and a user especially for the purpose.  The user you create must have 
+SELECT, INSERT and DELETE privileges otherwise the program will not 
+operate correctly.
+
+By default, Ofcomverter uses "ofcomverter" as the database name, so 
+that's what we'll use for the purposes of these instructions.
+
+The database should now be created as 'UTF-8' format, not as 'LATIN-1' 
+as in previous versions.
+
+CREATE DATABASE ofcomverter WITH ENCODING 'UTF-8';
+
+CREATE TABLE operators (
+    code text NOT NULL,
+    operator text,
+    numberlength integer,
+    numberformat text,
+    allocated boolean,
+    protected boolean,
+    designated boolean,
+    free boolean,
+    date date,
+    changes text,
+    notes text,
+    tariff_notes text
+);
+
+CREATE TABLE locations (
+    code text NOT NULL,
+    location text,
+    designated boolean,
+    notes text,
+    date text
+);

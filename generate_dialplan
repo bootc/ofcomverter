@@ -1,0 +1,157 @@
+#!/usr/bin/python -W ignore
+
+#############################################################################
+# Generate Asterisk Dialplan from Ofcomverter database
+# Copyright (C) 2008 Gary Hawkins <gary.hawkins@garysoft.co.uk>
+# and others -- see CREDITS file for details
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public Licence as published by
+# the Free Software Foundation, either version 3 of the Licence, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public Licence for more details.
+#
+# You should have received a copy of the GNU General Public Licence
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#############################################################################
+
+import getopt
+import sys
+import os
+import string
+from pyPgSQL import PgSQL
+import MySQLdb
+
+def connect_to_db(mydbtype,mydbhost,mydbport,mydbname,mydbusername,mydbpassword):
+	if mydbport > 0:
+		if mydbtype=="mysql":
+			return MySQLdb.connect(host=mydbhost,db=mydbname,user=mydbusername,passwd=mydbpassword,port=mydbport)
+		else:
+			return PgSQL.connect(host=mydbhost,database=mydbname,user=mydbusername,password=mydbpassword,port=mydbport)
+	else:
+		if mydbtype=="mysql":
+			return MySQLdb.connect(host=mydbhost,db=mydbname,user=mydbusername,passwd=mydbpassword)
+		else:
+			return PgSQL.connect(host=mydbhost,database=mydbname,user=mydbusername,password=mydbpassword)
+			
+def print_banner():
+	sys.stderr.write("generate_dialplan version 0.8.4\n")
+	sys.stderr.write("Copyright (C) 2008 Gary Hawkins <gary.hawkins@garysoft.co.uk>\n")
+	sys.stderr.write("and others -- see CREDITS file for details\n")
+	sys.stderr.write("\n")
+	sys.stderr.write("This program is free software, licensed under the terms of the\n")
+	sys.stderr.write("GNU General Public Licence version 3 or, at your option, any later\n")
+	sys.stderr.write("version.  See http://www.gnu.org/licenses/ for full details\n")
+	sys.stderr.write("\n")
+	
+def print_help():
+	sys.stderr.write("-d  Database type - either pgsql or mysql\n")
+	sys.stderr.write("-a  Application to use at end of each exten => line\n")
+	sys.stderr.write("-x  Dialling prefix (e.g. 9) to append to beginning of number\n")
+	sys.stderr.write("-v  Generate ALL valid UK numbers not just those under 10 digits\n")
+	sys.stderr.write("-n  Database name (defaults to ofcomverter)\n")
+	sys.stderr.write("-u  Database username (defaults to ofcomverter)\n")
+	sys.stderr.write("-w  Database password (defaults to ofcomverter)\n")
+	sys.stderr.write("-h  Database hostname (defaults to localhost)\n")
+	sys.stderr.write("-p  Database port (defaults to the appropriate default port)\n")
+	sys.stderr.write("-c  Context to place the extensions into\n")
+	sys.stderr.write("-e  Generate AEL instead of extensions.conf syntax\n")
+	sys.stderr.write("-q  Quiet flag - do not print banner\n")
+	sys.stderr.write("\n")
+	
+##################################################################################################
+
+def main():
+
+	try:
+		options,arguments = getopt.getopt(sys.argv[1:],'vqa:d:n:u:w:h:p:x:c:e')
+	except getopt.GetoptError, error:
+		print str(error)
+		print ""
+		print_help()
+		sys.exit(2)
+
+	extenargument=None
+	dialprefix=""
+	dbtype="pgsql"
+	dbport=0
+	dbname="ofcomverter"
+	dbusername="ofcomverter"
+	dbpassword="ofcomverter"
+	dbhostname="127.0.0.1"
+	verbose=False
+	context=""
+	ael=False
+	donotprintbanner = False
+
+	for option,argument in options:
+		if option == "-d":
+			dbtype = argument
+		if option == "-n":
+			dbtype = argument
+		if option == "-u":
+			dbusername = argument
+		if option == "-p":
+			dbport = argument
+		if option == "-h":
+			dbhostname = argument
+		if option == "-U":
+			dburl = argument
+		if option == "-w":
+			dbpassword = argument
+		if option == "-a":
+			extenargument = argument
+		if option == "-x":
+			dialprefix = argument
+		if option == "-v":
+			verbose = True
+		if option == "-c":
+			context = argument
+		if option == "-e":
+			ael = True
+		if option == "-q":
+			donotprintbanner = True
+
+	if donotprintbanner == False:
+		print_banner()
+
+	if extenargument == None:
+		print "You need to specify an argument for -a"
+		sys.exit(1)
+
+	dbhandle=connect_to_db(dbtype,dbhostname,dbport,dbname,dbusername,dbpassword)
+	dbcursor=dbhandle.cursor()
+	if dbtype == "mysql":
+		if verbose:
+			dbcursor.execute("SELECT code,numberlength FROM operators WHERE numberlength > 4 AND allocated=1 ORDER BY code,numberlength")
+		else:
+			dbcursor.execute("SELECT code,numberlength FROM operators WHERE numberlength > 4 AND numberlength < 10 AND allocated=1 ORDER BY code,numberlength")
+	else:
+		if verbose:
+			dbcursor.execute("SELECT code,numberlength FROM operators WHERE numberlength > 4 AND allocated=true ORDER BY code,numberlength")
+		else:
+			dbcursor.execute("SELECT code,numberlength FROM operators WHERE numberlength > 4 AND numberlength < 10 AND allocated=true ORDER BY code,numberlength")
+	if context != "":
+		if ael:
+			print "context " + context + " {"
+		else:
+			print "[" + context + "]"
+	while 1:
+		row=dbcursor.fetchone()
+		if row == None:
+			break
+		if ael:
+			print "\t_" + dialprefix + row[0] + (((int(row[1])+1)-len(row[0]))*"X") + " => " + extenargument + ";"
+		else:
+			print "exten => _" + dialprefix + row[0] + (((int(row[1])+1)-len(row[0]))*"X") + ",1," + extenargument
+	if context != "" and ael:
+		print "};"
+
+
+if __name__ == "__main__":
+	main()
+

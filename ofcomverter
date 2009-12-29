@@ -1,0 +1,363 @@
+#!/usr/bin/python -W ignore
+
+#############################################################################
+# Ofcomverter
+# Copyright (C) 2008 Gary Hawkins <gary.hawkins@garysoft.co.uk> and
+# others, see CREDITS file
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public Licence as published by
+# the Free Software Foundation, either version 3 of the Licence, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public Licence for more details.
+#
+# You should have received a copy of the GNU General Public Licence
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#############################################################################
+
+import csv
+import getopt
+import sys
+import os
+import string
+import urllib
+import zipfile
+import shutil
+from pyPgSQL import PgSQL
+import MySQLdb
+
+def parse_s1code(dbcursor,tempdir):
+	print "Processing s1_code.txt..."
+	s1code = csv.reader(open(tempdir + "/s1_code.txt","rb"))
+	s1code.next()
+
+	for row in s1code:        
+		number="0"+row[0]+row[1]+row[2]
+		status=row[3]
+		date=row[4]
+		operator=row[5]
+		numberlength=row[6]
+		change=row[7]
+		notes=unicode(row[8],'LATIN-1').encode('utf-8')
+		statustranslated=translate_status(status)
+		allocated=statustranslated[0]
+		protected=statustranslated[1]
+		designated=statustranslated[2]
+		free=statustranslated[3]
+		numlength = number_of_digits(numberlength)
+		newdate=None
+		dbcursor.execute("INSERT INTO operators (code,operator,numberlength,numberformat,allocated,protected,designated,free,date,changes,notes) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", (number,operator,numlength[0],numlength[1],allocated,protected,designated,free,newdate,change,notes))
+
+def parse_s3code(dbcursor,tempdir):
+	print "Processing s3_code.txt..."
+	s3code = csv.reader(open(tempdir + "/s3_code.txt","rb"))
+	s3code.next()
+
+	for row in s3code:        
+		number="0"+row[0]+row[1]+row[2]
+		status=row[3]
+		date=row[4]
+		operator=row[5]
+		numberlength=row[6]
+		change=row[7]
+		notes=row[8]
+		statustranslated=translate_status(status)
+		allocated=statustranslated[0]
+		protected=statustranslated[1]
+		designated=statustranslated[2]
+		free=statustranslated[3]
+		numlength = [10,'0+10']
+		newdate=None
+		dbcursor.execute("INSERT INTO operators (code,operator,numberlength,numberformat,allocated,protected,designated,free,date,changes,notes) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", (number,operator,numlength[0],numlength[1],allocated,protected,designated,free,newdate,change,notes))
+
+def parse_s5code(dbcursor,tempdir):
+	print "Processing s5_code.txt..."
+	s5code = csv.reader(open(tempdir + "/s5_code.txt","rb"))
+	s5code.next()
+
+	for row in s5code:        
+		number="0"+row[0]+row[1]
+		status=row[2]
+		date=row[3]
+		operator=row[4]
+		notes=row[5]
+		use=row[5]
+		change=row[6]
+		statustranslated=translate_status(status)
+		allocated=statustranslated[0]
+		protected=statustranslated[1]
+		designated=statustranslated[2]
+		free=statustranslated[3]
+		numlength = [10,'0+10']
+		newdate=None
+		dbcursor.execute("INSERT INTO operators (code,operator,numberlength,numberformat,allocated,protected,designated,free,date,changes,notes) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", (number,operator,numlength[0],numlength[1],allocated,protected,designated,free,newdate,change,notes))
+
+
+def parse_s7code(dbcursor,tempdir):
+	print "Processing s7_code.txt..."
+	s7code = csv.reader(open(tempdir + "/s7_code.txt","rb"))
+	s7code.next()
+
+	for row in s7code:        
+		number="0"+row[0]+row[1]
+		status=row[2]
+		date=row[3]
+		operator=row[4]
+		notes=row[5]
+		use=row[5]
+		change=row[6]
+		statustranslated=translate_status(status)
+		allocated=statustranslated[0]
+		protected=statustranslated[1]
+		designated=statustranslated[2]
+		free=statustranslated[3]
+		numlength = [10,'0+10']
+		newdate=None
+		dbcursor.execute("INSERT INTO operators (code,operator,numberlength,numberformat,allocated,protected,designated,free,date,changes,notes) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", (number,operator,numlength[0],numlength[1],allocated,protected,designated,free,newdate,change,notes))
+
+def parse_s8code(dbcursor,tempdir):
+	print "Processing s8_code.txt..."
+	s8code = csv.reader(open(tempdir + "/s8_code.txt","rb"))
+	s8code.next()
+
+	for row in s8code:        
+		number="0"+row[0]+row[1]+row[2]
+		status=row[3]
+		tariffnotes=unicode(row[4],'LATIN-1').encode('utf-8')
+		date=row[5]
+		operator=row[6]
+		if row[8] > "":
+			numlength=[ int(row[8].split(' ')[0]), "0+"+row[8].split(' ')[0] ]
+		else:
+			numlength=[ 10, "0+10" ]
+		change=row[9]
+		notes=unicode(row[8],'LATIN-1').encode('utf-8')
+		statustranslated=translate_status(status)
+		allocated=statustranslated[0]
+		protected=statustranslated[1]
+		designated=statustranslated[2]
+		free=statustranslated[3]
+		newdate=None
+
+		# Fix for codelist.zip error where some Allocated (Closed Range) entries have 0+10 when they should have 0+9
+		if status == "Allocated (Closed Range)":
+			numlength=[ 9, "0+9" ]
+			notes=unicode("9 Digit Numbers",'LATIN-1').encode('utf-8')
+
+		dbcursor.execute("INSERT INTO operators (code,operator,numberlength,numberformat,allocated,protected,designated,free,date,changes,notes,tariff_notes) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", (number,operator,numlength[0],numlength[1],allocated,protected,designated,free,newdate,change,notes,tariffnotes))
+
+def parse_s9code(dbcursor,tempdir):
+	print "Processing s9_code.txt..."
+	s9code = csv.reader(open(tempdir + "/s9_code.txt","rb"))
+	s9code.next()
+
+	for row in s9code:        
+		number="0"+row[0]+row[1]
+		status=row[2]
+		tariffnotes=unicode(row[3],'LATIN-1').encode('utf-8')
+		notes=unicode(row[4],'LATIN-1').encode('utf-8')
+		operator=row[5]
+		if row[7] > "":
+			numlength=[ int(row[7].split(' ')[0]), "0+"+row[7].split(' ')[0] ]
+		else:
+			numlength=[ 10, "0+10" ]
+		change=row[7]
+		date=row[8]
+		statustranslated=translate_status(status)
+		allocated=statustranslated[0]
+		protected=statustranslated[1]
+		designated=statustranslated[2]
+		free=statustranslated[3]
+		newdate=None
+		
+		# Fix bug in codelist.zip where some Allocated (Closed Range) numbers are incorrectly listed as 0+10 and should be 0+9
+		if status == "Allocated (Closed Range)":
+			numlength=[ 9, "0+9" ]
+
+		dbcursor.execute("INSERT INTO operators (code,operator,numberlength,numberformat,allocated,protected,designated,free,date,changes,notes,tariff_notes) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", (number,operator,numlength[0],numlength[1],allocated,protected,designated,free,newdate,change,notes,tariffnotes))
+
+def parse_sabc(dbcursor,tempdir):
+	print "Processing sabc.txt..."
+	sabc = csv.reader(open(tempdir + "/sabc.txt","rb"))
+	sabc.next()
+
+	for row in sabc: 
+		number="0"+row[0]+row[1]
+		designated=translate_status_sabc(row[2])
+		location=row[3]
+		notes=row[4]
+		date=row[5]
+		dbcursor.execute("INSERT INTO locations (code,designated,location,notes,date) VALUES (%s,%s,%s,%s,%s)", (number,designated,location,notes,date))
+
+def translate_status(mystatus):
+	if mystatus == "Allocated":
+		return [True,False,False,False]
+	if mystatus == "Allocated (Closed Range)":
+		return [True,False,False,False]
+	elif mystatus == "Protected":
+		return [False,True,False,False]
+	elif mystatus == "Designated":
+		return [False,False,True,False]
+	else:
+		return [False,False,False,True]
+
+def translate_status_sabc(mystatus):
+	if mystatus == "Designated":
+		return True
+	else:
+		return False
+
+def number_of_digits(mynumberlength):
+	newnumberlength=""
+	totalnumberlength=0
+	for i in range(0,len(mynumberlength)):
+		if mynumberlength[i] == "+" or (mynumberlength[i] >= "0" and mynumberlength[i] <= "9"):
+			newnumberlength = newnumberlength + mynumberlength[i]
+	if newnumberlength == "":
+		return [0,""]
+	for j in newnumberlength.split('+'):
+		totalnumberlength=totalnumberlength + int(j)
+	return [totalnumberlength,newnumberlength]
+
+def download_file(myurl,tempdir):
+	os.mkdir(tempdir)
+	print "Downloading codelist.zip from " + myurl + "..."
+	urllib.urlretrieve(myurl,tempdir+"/codelist.zip")
+
+def unzip_file(tempdir):
+	myzipfile=zipfile.ZipFile(tempdir+"/codelist.zip",'r')
+	for i in myzipfile.namelist():	
+		print "Unzipping file " + i
+		fhandle=open(tempdir+"/"+i,"w")
+		fhandle.write(myzipfile.read(i))
+		fhandle.close()
+	myzipfile.close()
+
+def connect_to_db(mydbtype,mydbhost,mydbport,mydbname,mydbusername,mydbpassword):
+	if mydbport > 0:
+		if mydbtype=="mysql":
+			return MySQLdb.connect(host=mydbhost,db=mydbname,user=mydbusername,passwd=mydbpassword,port=mydbport)
+		else:
+			return PgSQL.connect(host=mydbhost,database=mydbname,user=mydbusername,password=mydbpassword,port=mydbport)
+	else:
+		if mydbtype=="mysql":
+			return MySQLdb.connect(host=mydbhost,db=mydbname,user=mydbusername,passwd=mydbpassword)
+		else:
+			return PgSQL.connect(host=mydbhost,database=mydbname,user=mydbusername,password=mydbpassword)
+
+def create_db_mysql(myhandle,mydbname):
+	myhandle.execute("CREATE DATABASE " + mydbname)
+	myhandle.execute("USE ofcomverter")
+	myhandle.execute("CREATE TABLE operators (code text NOT NULL, operator text, numberlength int(11) default NULL, numberformat text, allocated tinyint(1) default NULL,  protected tinyint(1) default NULL, designated tinyint(1) default NULL, free tinyint(1) default NULL, date text, changes text, notes text, tariff_notes text)")
+	myhandle.execute("CREATE TABLE locations (code text NOT NULL, location text, designated tinyint(1) default NULL, notes text, date text)")
+
+def print_banner():
+	print "Ofcomverter Version 0.8.4"
+	print "Copyright (C) 2008 Gary Hawkins <gary.hawkins@garysoft.co.uk> and"
+	print "others -- see CREDITS file for details"
+	print ""
+	print "This program is free software, licensed under the terms of the"
+	print "GNU General Public Licence version 3 or, at your option, any later"
+	print "version.  See http://www.gnu.org/licenses/ for full details"
+	print ""
+	
+def print_help():
+	print "-d  Type of database, either 'mysql' or 'pgsql' (defaults to pgsql)"
+	print "-n  Database name (defaults to ofcomverter)"
+	print "-u  Database username (defaults to ofcomverter)"
+	print "-w  Database password (defaults to ofcomverter)"
+	print "-h  Database hostname (defaults to localhost)"
+	print "-p  Database port (defaults to the appropriate default port)"
+	print "-U  URL to download codelist.zip from (defaults to Ofcom web site)"
+	print "-c  Create database (mysql only)"
+	print "-q  Do not print banner"
+	print ""
+	
+##################################################################################################
+
+def main():
+
+	try:
+		options,arguments = getopt.getopt(sys.argv[1:],'ch:d:n:u:p:h:U:w:q')
+	except getopt.GetoptError, error:
+		print_banner()		
+		print str(error)
+		print ""
+		print_help()
+		sys.exit(2)
+
+	dbtype="pgsql"
+	dbport=0
+	dbname="ofcomverter"
+	dbusername="ofcomverter"
+	dbpassword="ofcomverter"
+	dbhostname="127.0.0.1"
+	dburl="http://www.ofcom.org.uk/telecoms/ioi/numbers/numbers_administered/codelist.zip"
+	dbcreate=False
+	donotprintbanner = False
+
+	for option,argument in options:
+		if option == "-q":
+			donotprintbanner = True
+		if option == "-d":
+			dbtype = argument
+		if option == "-n":
+			dbname = argument
+		if option == "-u":
+			dbusername = argument
+		if option == "-p":
+			dbport = argument
+		if option == "-h":
+			dbhostname = argument
+		if option == "-U":
+			dburl = argument
+		if option == "-w":
+			dbpassword = argument
+		if option == "-c":
+			dbcreate = True
+
+	if donotprintbanner != True:
+		print_banner()
+
+	if dbcreate == True:
+		dbhandle=connect_to_db(dbtype,dbhostname,dbport,"",dbusername,dbpassword)
+	else:
+		dbhandle=connect_to_db(dbtype,dbhostname,dbport,dbname,dbusername,dbpassword)
+
+	dbcursor=dbhandle.cursor()
+	if dbcreate:
+		if dbtype == "mysql":
+			create_db_mysql(dbcursor,dbname)
+			dbhandle.close()
+			print "Empty database created.  Please run ofcomverter without the -c option to populate it"
+			sys.exit(0)
+		else:
+			print "Create database only available for mysql"
+			sys.exit(0)
+
+	tempdir = os.tempnam()
+	download_file(dburl,tempdir)
+	unzip_file(tempdir)
+	print "Deleting old operators table..."
+	dbcursor.execute("DELETE FROM operators;")
+	parse_s1code(dbcursor,tempdir)
+	parse_s3code(dbcursor,tempdir)
+	parse_s5code(dbcursor,tempdir)
+	parse_s7code(dbcursor,tempdir)
+	parse_s8code(dbcursor,tempdir)
+	parse_s9code(dbcursor,tempdir)
+	dbhandle.commit()
+	print "Deleting old locations table..."
+	dbcursor.execute("DELETE FROM locations;")
+	parse_sabc(dbcursor,tempdir)
+	dbhandle.commit()
+	dbhandle.close()
+
+	shutil.rmtree(tempdir,True)
+
+if __name__ == "__main__":
+	main()

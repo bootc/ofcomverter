@@ -1,0 +1,33 @@
+Ofcomverter
+Copyright (C) 2008 Gary Hawkins and others, see CREDITS
+
+This program is licensed under the GNU General Public Licence
+version 3 or, at your, option, any later version. See file
+COPYING for more information.
+
+
+Installation Instructions
+=========================
+
+You need a database to use this program.  Either MySQL or PostgreSQL is 
+currently supported, as long as it is a recent version.  It has been 
+tested on MySQL 5.x and PostgreSQL 8.2.  Your mileage may vary.
+
+You will need to create an appropriate database to use this program.  
+See the files README.PostgreSQL or README.MySQL for information on how 
+to create the required database and associated tables.
+
+Usage Instructions
+==================
+
+ofcomverter [-d [pgsql|mysql]] [-h hostname] [-u username] [-w password] 
+[-p port] [-U url]
+
+-d   Type of database to use.  Currently pgsql (PostgreSQL) and mysql
+     (MySQL) are valid options
+-h   Hostname of the database server (defaults to 127.0.0.1)
+-u   Database user name (defaults to ofcomverter)
+-p   Database port number (defaults to the default port for your DB)
+-w   Database password (defaults to ofcomverter)
+-U   URL of the location where you wish to download codelist.zip from
+     (defaults to Ofcom web site)
