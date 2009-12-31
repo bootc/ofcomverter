@@ -27,14 +27,37 @@ import string
 import urllib
 import zipfile
 import shutil
-from pyPgSQL import PgSQL
-import MySQLdb
 
-def parse_s1code(dbcursor,tempdir):
+try:
+	from pyPgSQL import PgSQL
+	db_pgsql=True
+except ImportError:
+	db_pgsql=False
+
+try:
+	import MySQLdb
+	db_mysql=True
+except ImportError:
+	db_mysql=False
+
+try:
+	from sqlite3 import dbapi2 as sqlite
+	db_sqlite=True
+except ImportError:
+	try:
+		from pysqlite2 import dbapi2 as sqlite
+		db_sqlite=True
+	except ImportError:
+		db_sqlite=False
+
+def parse_s1code(dbcursor,dbparmstyle,tempdir):
 	print "Processing s1_code.txt..."
 	s1code = csv.reader(open(tempdir + "/s1_code.txt","rb"))
 	s1code.next()
-
+	
+	stm = "INSERT INTO operators (code,operator,numberlength,numberformat,allocated,protected,designated,free,date,changes,notes) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+	stm = db_parmstyle_xlate(stm, dbparmstyle)
+	
 	for row in s1code:        
 		number="0"+row[0]+row[1]+row[2]
 		status=row[3]
@@ -50,13 +73,16 @@ def parse_s1code(dbcursor,tempdir):
 		free=statustranslated[3]
 		numlength = number_of_digits(numberlength)
 		newdate=None
-		dbcursor.execute("INSERT INTO operators (code,operator,numberlength,numberformat,allocated,protected,designated,free,date,changes,notes) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", (number,operator,numlength[0],numlength[1],allocated,protected,designated,free,newdate,change,notes))
+		dbcursor.execute(stm, (number,operator,numlength[0],numlength[1],allocated,protected,designated,free,newdate,change,notes))
 
-def parse_s3code(dbcursor,tempdir):
+def parse_s3code(dbcursor,dbparmstyle,tempdir):
 	print "Processing s3_code.txt..."
 	s3code = csv.reader(open(tempdir + "/s3_code.txt","rb"))
 	s3code.next()
-
+	
+	stm = "INSERT INTO operators (code,operator,numberlength,numberformat,allocated,protected,designated,free,date,changes,notes) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+	stm = db_parmstyle_xlate(stm, dbparmstyle)
+	
 	for row in s3code:        
 		number="0"+row[0]+row[1]+row[2]
 		status=row[3]
@@ -72,12 +98,15 @@ def parse_s3code(dbcursor,tempdir):
 		free=statustranslated[3]
 		numlength = [10,'0+10']
 		newdate=None
-		dbcursor.execute("INSERT INTO operators (code,operator,numberlength,numberformat,allocated,protected,designated,free,date,changes,notes) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", (number,operator,numlength[0],numlength[1],allocated,protected,designated,free,newdate,change,notes))
+		dbcursor.execute(stm, (number,operator,numlength[0],numlength[1],allocated,protected,designated,free,newdate,change,notes))
 
-def parse_s5code(dbcursor,tempdir):
+def parse_s5code(dbcursor,dbparmstyle,tempdir):
 	print "Processing s5_code.txt..."
 	s5code = csv.reader(open(tempdir + "/s5_code.txt","rb"))
 	s5code.next()
+	
+	stm = "INSERT INTO operators (code,operator,numberlength,numberformat,allocated,protected,designated,free,date,changes,notes) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+	stm = db_parmstyle_xlate(stm, dbparmstyle)
 
 	for row in s5code:        
 		number="0"+row[0]+row[1]
@@ -94,13 +123,16 @@ def parse_s5code(dbcursor,tempdir):
 		free=statustranslated[3]
 		numlength = [10,'0+10']
 		newdate=None
-		dbcursor.execute("INSERT INTO operators (code,operator,numberlength,numberformat,allocated,protected,designated,free,date,changes,notes) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", (number,operator,numlength[0],numlength[1],allocated,protected,designated,free,newdate,change,notes))
+		dbcursor.execute(stm, (number,operator,numlength[0],numlength[1],allocated,protected,designated,free,newdate,change,notes))
 
 
-def parse_s7code(dbcursor,tempdir):
+def parse_s7code(dbcursor,dbparmstyle,tempdir):
 	print "Processing s7_code.txt..."
 	s7code = csv.reader(open(tempdir + "/s7_code.txt","rb"))
 	s7code.next()
+	
+	stm = "INSERT INTO operators (code,operator,numberlength,numberformat,allocated,protected,designated,free,date,changes,notes) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+	stm = db_parmstyle_xlate(stm, dbparmstyle)
 
 	for row in s7code:        
 		number="0"+row[0]+row[1]
@@ -117,12 +149,15 @@ def parse_s7code(dbcursor,tempdir):
 		free=statustranslated[3]
 		numlength = [10,'0+10']
 		newdate=None
-		dbcursor.execute("INSERT INTO operators (code,operator,numberlength,numberformat,allocated,protected,designated,free,date,changes,notes) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", (number,operator,numlength[0],numlength[1],allocated,protected,designated,free,newdate,change,notes))
+		dbcursor.execute(stm, (number,operator,numlength[0],numlength[1],allocated,protected,designated,free,newdate,change,notes))
 
-def parse_s8code(dbcursor,tempdir):
+def parse_s8code(dbcursor,dbparmstyle,tempdir):
 	print "Processing s8_code.txt..."
 	s8code = csv.reader(open(tempdir + "/s8_code.txt","rb"))
 	s8code.next()
+	
+	stm = "INSERT INTO operators (code,operator,numberlength,numberformat,allocated,protected,designated,free,date,changes,notes,tariff_notes) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+	stm = db_parmstyle_xlate(stm, dbparmstyle)
 
 	for row in s8code:        
 		number="0"+row[0]+row[1]+row[2]
@@ -148,12 +183,15 @@ def parse_s8code(dbcursor,tempdir):
 			numlength=[ 9, "0+9" ]
 			notes=unicode("9 Digit Numbers",'LATIN-1').encode('utf-8')
 
-		dbcursor.execute("INSERT INTO operators (code,operator,numberlength,numberformat,allocated,protected,designated,free,date,changes,notes,tariff_notes) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", (number,operator,numlength[0],numlength[1],allocated,protected,designated,free,newdate,change,notes,tariffnotes))
+		dbcursor.execute(stm, (number,operator,numlength[0],numlength[1],allocated,protected,designated,free,newdate,change,notes,tariffnotes))
 
-def parse_s9code(dbcursor,tempdir):
+def parse_s9code(dbcursor,dbparmstyle,tempdir):
 	print "Processing s9_code.txt..."
 	s9code = csv.reader(open(tempdir + "/s9_code.txt","rb"))
 	s9code.next()
+	
+	stm = "INSERT INTO operators (code,operator,numberlength,numberformat,allocated,protected,designated,free,date,changes,notes,tariff_notes) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+	stm = db_parmstyle_xlate(stm, dbparmstyle)
 
 	for row in s9code:        
 		number="0"+row[0]+row[1]
@@ -178,12 +216,15 @@ def parse_s9code(dbcursor,tempdir):
 		if status == "Allocated (Closed Range)":
 			numlength=[ 9, "0+9" ]
 
-		dbcursor.execute("INSERT INTO operators (code,operator,numberlength,numberformat,allocated,protected,designated,free,date,changes,notes,tariff_notes) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", (number,operator,numlength[0],numlength[1],allocated,protected,designated,free,newdate,change,notes,tariffnotes))
+		dbcursor.execute(stm, (number,operator,numlength[0],numlength[1],allocated,protected,designated,free,newdate,change,notes,tariffnotes))
 
-def parse_sabc(dbcursor,tempdir):
+def parse_sabc(dbcursor,dbparmstyle,tempdir):
 	print "Processing sabc.txt..."
 	sabc = csv.reader(open(tempdir + "/sabc.txt","rb"))
 	sabc.next()
+	
+	stm = "INSERT INTO locations (code,designated,location,notes,date) VALUES (%s,%s,%s,%s,%s)"
+	stm = db_parmstyle_xlate(stm, dbparmstyle)
 
 	for row in sabc: 
 		number="0"+row[0]+row[1]
@@ -191,7 +232,16 @@ def parse_sabc(dbcursor,tempdir):
 		location=row[3]
 		notes=row[4]
 		date=row[5]
-		dbcursor.execute("INSERT INTO locations (code,designated,location,notes,date) VALUES (%s,%s,%s,%s,%s)", (number,designated,location,notes,date))
+		dbcursor.execute(stm, (number,designated,location,notes,date))
+
+def db_parmstyle_xlate(stm, parmstyle):
+	if parmstyle == "format" or parmstyle == "pyformat":
+		return stm
+	elif parmstyle == "qmark":
+		return stm.replace("%s", "?")
+	else:
+		print "Unknown database parameter style: " + parmstyle
+		sys.exit(0)
 
 def translate_status(mystatus):
 	if mystatus == "Allocated":
@@ -241,19 +291,25 @@ def connect_to_db(mydbtype,mydbhost,mydbport,mydbname,mydbusername,mydbpassword)
 	if mydbport > 0:
 		if mydbtype=="mysql":
 			return MySQLdb.connect(host=mydbhost,db=mydbname,user=mydbusername,passwd=mydbpassword,port=mydbport)
+		elif mydbtype=="sqlite":
+			return sqlite.connect(mydbname)
 		else:
 			return PgSQL.connect(host=mydbhost,database=mydbname,user=mydbusername,password=mydbpassword,port=mydbport)
 	else:
 		if mydbtype=="mysql":
 			return MySQLdb.connect(host=mydbhost,db=mydbname,user=mydbusername,passwd=mydbpassword)
+		elif mydbtype=="sqlite":
+			return sqlite.connect(mydbname)
 		else:
 			return PgSQL.connect(host=mydbhost,database=mydbname,user=mydbusername,password=mydbpassword)
 
-def create_db_mysql(myhandle,mydbname):
-	myhandle.execute("CREATE DATABASE " + mydbname)
-	myhandle.execute("USE ofcomverter")
+def create_db_mysql(myhandle):
 	myhandle.execute("CREATE TABLE operators (code text NOT NULL, operator text, numberlength int(11) default NULL, numberformat text, allocated tinyint(1) default NULL,  protected tinyint(1) default NULL, designated tinyint(1) default NULL, free tinyint(1) default NULL, date text, changes text, notes text, tariff_notes text)")
 	myhandle.execute("CREATE TABLE locations (code text NOT NULL, location text, designated tinyint(1) default NULL, notes text, date text)")
+
+def create_db_sqlite(myhandle):
+	myhandle.execute("CREATE TABLE operators (code text NOT NULL, operator text, numberlength integer default NULL, numberformat text, allocated integer default NULL,  protected integer default NULL, designated integer default NULL, free integer default NULL, date text, changes text, notes text, tariff_notes text)")
+	myhandle.execute("CREATE TABLE locations (code text NOT NULL, location text, designated integer default NULL, notes text, date text)")
 
 def print_banner():
 	print "Ofcomverter Version 0.8.4"
@@ -266,7 +322,7 @@ def print_banner():
 	print ""
 	
 def print_help():
-	print "-d  Type of database, either 'mysql' or 'pgsql' (defaults to pgsql)"
+	print "-d  Type of database: 'sqlite', 'mysql' or 'pgsql' (defaults to pgsql)"
 	print "-n  Database name (defaults to ofcomverter)"
 	print "-u  Database username (defaults to ofcomverter)"
 	print "-w  Database password (defaults to ofcomverter)"
@@ -299,6 +355,7 @@ def main():
 	dburl="http://www.ofcom.org.uk/telecoms/ioi/numbers/numbers_administered/codelist.zip"
 	dbcreate=False
 	donotprintbanner = False
+	dbparmstyle=False
 
 	for option,argument in options:
 		if option == "-q":
@@ -323,40 +380,59 @@ def main():
 	if donotprintbanner != True:
 		print_banner()
 
-	if dbcreate == True:
-		dbhandle=connect_to_db(dbtype,dbhostname,dbport,"",dbusername,dbpassword)
+	if dbtype=="pgsql":
+		if db_pgsql != True:
+			print "Database pgsql not available. Please install pyPgSQL."
+			sys.exit(0)
+		else:
+			dbparmstyle = PgSQL.paramstyle
+	elif dbtype=="mysql":
+		if db_mysql != True:
+			print "Database mysql not available. Please install MySQLdb."
+			sys.exit(0)
+		else:
+			dbparmstyle = MySQLdb.paramstyle
+	elif dbtype=="sqlite":
+		if db_sqlite != True:
+			print "Database sqlite not available. Please install sqlite3 or pysqlite2."
+			sys.exit(0)
+		else:
+			dbparmstyle = sqlite.paramstyle
 	else:
-		dbhandle=connect_to_db(dbtype,dbhostname,dbport,dbname,dbusername,dbpassword)
-
+		print "Database type is not recognised. Please choose one of 'pgsql', 'mysql' or 'sqlite'."
+		sys.exit(0)
+	
+	dbhandle=connect_to_db(dbtype,dbhostname,dbport,dbname,dbusername,dbpassword)
+	
 	dbcursor=dbhandle.cursor()
 	if dbcreate:
 		if dbtype == "mysql":
-			create_db_mysql(dbcursor,dbname)
-			dbhandle.close()
-			print "Empty database created.  Please run ofcomverter without the -c option to populate it"
-			sys.exit(0)
+			create_db_mysql(dbcursor)
+		elif dbtype == "sqlite":
+			create_db_sqlite(dbcursor)
 		else:
-			print "Create database only available for mysql"
+			print "Create database only available for mysql and sqlite"
 			sys.exit(0)
-
+		print "Database created."
+	
 	tempdir = os.tempnam()
 	download_file(dburl,tempdir)
 	unzip_file(tempdir)
 	print "Deleting old operators table..."
 	dbcursor.execute("DELETE FROM operators;")
-	parse_s1code(dbcursor,tempdir)
-	parse_s3code(dbcursor,tempdir)
-	parse_s5code(dbcursor,tempdir)
-	parse_s7code(dbcursor,tempdir)
-	parse_s8code(dbcursor,tempdir)
-	parse_s9code(dbcursor,tempdir)
+	parse_s1code(dbcursor,dbparmstyle,tempdir)
+	parse_s3code(dbcursor,dbparmstyle,tempdir)
+	parse_s5code(dbcursor,dbparmstyle,tempdir)
+	parse_s7code(dbcursor,dbparmstyle,tempdir)
+	parse_s8code(dbcursor,dbparmstyle,tempdir)
+	parse_s9code(dbcursor,dbparmstyle,tempdir)
 	dbhandle.commit()
 	print "Deleting old locations table..."
 	dbcursor.execute("DELETE FROM locations;")
-	parse_sabc(dbcursor,tempdir)
+	parse_sabc(dbcursor,dbparmstyle,tempdir)
 	dbhandle.commit()
 	dbhandle.close()
-
+	
 	shutil.rmtree(tempdir,True)
 
 if __name__ == "__main__":
