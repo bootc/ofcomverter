@@ -1,11 +1,12 @@
 Package: ofcomverter
-Version: 0.8.3
+Version: 1.0.0beta2
 Section: web 
 Priority: optional
 Architecture: all
 Essential: no
-Depends: python, python-pgsql, python-mysqldb
-Maintainer: Gary Hawkins <gary.hawkins@garysoft.co.uk>
+Depends: python, python-pgsql, python-mysqldb. python-pysqlite2
+Suggests: mysql-server, postgresql, sqlite3
+Maintainer: Gary Hawkins <gary.hawkins@garyhawkins.me.uk>
 Description: Ofcom codelist.zip to PostgreSQL/MySQL converter
  Program to convert the files provided in codelist.zip from Ofcom to either a
- PostgreSQL or MySQL database.
+ PostgreSQL, MySQL or sqlite3 database.

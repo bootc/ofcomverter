@@ -39,8 +39,8 @@ def connect_to_db(mydbtype,mydbhost,mydbport,mydbname,mydbusername,mydbpassword)
 			return PgSQL.connect(host=mydbhost,database=mydbname,user=mydbusername,password=mydbpassword)
 			
 def print_banner():
-	sys.stderr.write("generate_dialplan version 0.8.4\n")
-	sys.stderr.write("Copyright (C) 2008 Gary Hawkins <gary.hawkins@garysoft.co.uk>\n")
+	sys.stderr.write("generate_dialplan version 1.0.0beta1\n")
+	sys.stderr.write("Copyright (C) 2008 Gary Hawkins <gary.hawkins@garyhawkins.me.uk>\n")
 	sys.stderr.write("and others -- see CREDITS file for details\n")
 	sys.stderr.write("\n")
 	sys.stderr.write("This program is free software, licensed under the terms of the\n")

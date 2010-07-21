@@ -9,5 +9,8 @@ Additional contributions and patches by:
 Some fixes to make ofcomverter work better with MySQL and also to 
 generate AEL dialplans from generate_dialplan (release 0.8.0)
 
+31 Dec 2009: Chris Boot (bootc) <bootc@bootc.net>
+Patches to make ofcomverter work with sqlite3 databases
+
 These contributions and patches are the copyright of their respective 
 authors.

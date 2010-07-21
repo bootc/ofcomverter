@@ -312,8 +312,8 @@ def create_db_sqlite(myhandle):
 	myhandle.execute("CREATE TABLE locations (code text NOT NULL, location text, designated integer default NULL, notes text, date text)")
 
 def print_banner():
-	print "Ofcomverter Version 0.8.4"
-	print "Copyright (C) 2008 Gary Hawkins <gary.hawkins@garysoft.co.uk> and"
+	print "Ofcomverter Version 1.0.0beta2"
+	print "Copyright (C) 2008-2010 Gary Hawkins <gary.hawkins@garyhawkins.me.uk> and"
 	print "others -- see CREDITS file for details"
 	print ""
 	print "This program is free software, licensed under the terms of the"
@@ -352,7 +352,7 @@ def main():
 	dbusername="ofcomverter"
 	dbpassword="ofcomverter"
 	dbhostname="127.0.0.1"
-	dburl="http://www.ofcom.org.uk/telecoms/ioi/numbers/numbers_administered/codelist.zip"
+	dburl="http://www.ofcom.org.uk/static/numbering/codelist.zip"
 	dbcreate=False
 	donotprintbanner = False
 	dbparmstyle=False
