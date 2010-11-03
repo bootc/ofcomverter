@@ -92,7 +92,7 @@ def main():
 		if option == "-d":
 			dbtype = argument
 		if option == "-n":
-			dbtype = argument
+			dbname = argument
 		if option == "-u":
 			dbusername = argument
 		if option == "-p":
