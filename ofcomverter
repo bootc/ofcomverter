@@ -216,7 +216,7 @@ def parse_s9code(dbcursor,dbparmstyle,tempdir):
 		if status == "Allocated (Closed Range)":
 			numlength=[ 9, "0+9" ]
 
-		dbcursor.execute(stm, (number,operator,numlength[0],numlength[1],allocated,protected,designated,free,newdate,change,notes,tariffnotes))
+		dbcursor.execute(stm, (number,operator.decode("iso-8859-1"),numlength[0],numlength[1],allocated,protected,designated,free,newdate,change,notes.decode("iso-8859-1"),tariffnotes.decode("iso-8859-1")))
 
 def parse_sabc(dbcursor,dbparmstyle,tempdir):
 	print "Processing sabc.txt..."
