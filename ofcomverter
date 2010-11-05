@@ -294,14 +294,20 @@ def connect_to_db(mydbtype,mydbhost,mydbport,mydbname,mydbusername,mydbpassword)
 		elif mydbtype=="sqlite":
 			return sqlite.connect(mydbname)
 		else:
-			return PgSQL.connect(host=mydbhost,database=mydbname,user=mydbusername,password=mydbpassword,port=mydbport)
+			cx = PgSQL.connect(host=mydbhost,database=mydbname,user=mydbusername,password=mydbpassword,port=mydbport,client_encoding="utf-8",unicode_results=1)
+			cu = cx.cursor()
+			cu.execute("SET client_encoding TO unicode")
+			return cx
 	else:
 		if mydbtype=="mysql":
 			return MySQLdb.connect(host=mydbhost,db=mydbname,user=mydbusername,passwd=mydbpassword)
 		elif mydbtype=="sqlite":
 			return sqlite.connect(mydbname)
 		else:
-			return PgSQL.connect(host=mydbhost,database=mydbname,user=mydbusername,password=mydbpassword)
+			cx = PgSQL.connect(host=mydbhost,database=mydbname,user=mydbusername,password=mydbpassword,client_encoding="utf-8",unicode_results=1)
+			cu = cx.cursor()
+			cu.execute("SET client_encoding TO unicode")
+			return cx
 
 def create_db_mysql(myhandle):
 	myhandle.execute("CREATE TABLE operators (code text NOT NULL, operator text, numberlength int(11) default NULL, numberformat text, allocated tinyint(1) default NULL,  protected tinyint(1) default NULL, designated tinyint(1) default NULL, free tinyint(1) default NULL, date text, changes text, notes text, tariff_notes text)")
