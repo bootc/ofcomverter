@@ -65,7 +65,7 @@ def parse_s1code(dbcursor,dbparmstyle,tempdir):
 		operator=row[5]
 		numberlength=row[6]
 		change=row[7]
-		notes=unicode(row[8],'LATIN-1').encode('utf-8')
+		notes=row[8].decode('LATIN-1')
 		statustranslated=translate_status(status)
 		allocated=statustranslated[0]
 		protected=statustranslated[1]
@@ -162,7 +162,7 @@ def parse_s8code(dbcursor,dbparmstyle,tempdir):
 	for row in s8code:        
 		number="0"+row[0]+row[1]+row[2]
 		status=row[3]
-		tariffnotes=unicode(row[4],'LATIN-1').encode('utf-8')
+		tariffnotes=row[4].decode('LATIN-1')
 		date=row[5]
 		operator=row[6]
 		if row[8] > "":
@@ -170,7 +170,7 @@ def parse_s8code(dbcursor,dbparmstyle,tempdir):
 		else:
 			numlength=[ 10, "0+10" ]
 		change=row[9]
-		notes=unicode(row[8],'LATIN-1').encode('utf-8')
+		notes=row[8].decode('LATIN-1')
 		statustranslated=translate_status(status)
 		allocated=statustranslated[0]
 		protected=statustranslated[1]
@@ -181,7 +181,7 @@ def parse_s8code(dbcursor,dbparmstyle,tempdir):
 		# Fix for codelist.zip error where some Allocated (Closed Range) entries have 0+10 when they should have 0+9
 		if status == "Allocated (Closed Range)":
 			numlength=[ 9, "0+9" ]
-			notes=unicode("9 Digit Numbers",'LATIN-1').encode('utf-8')
+			notes="9 Digit Numbers".decode('LATIN-1')
 
 		dbcursor.execute(stm, (number,operator,numlength[0],numlength[1],allocated,protected,designated,free,newdate,change,notes,tariffnotes))
 
@@ -196,8 +196,8 @@ def parse_s9code(dbcursor,dbparmstyle,tempdir):
 	for row in s9code:        
 		number="0"+row[0]+row[1]
 		status=row[2]
-		tariffnotes=unicode(row[3],'LATIN-1').encode('utf-8')
-		notes=unicode(row[4],'LATIN-1').encode('utf-8')
+		tariffnotes=row[3].decode('LATIN-1')
+		notes=row[4].decode('LATIN-1')
 		operator=row[5]
 		if row[7] > "":
 			numlength=[ int(row[7].split(' ')[0]), "0+"+row[7].split(' ')[0] ]
@@ -216,7 +216,7 @@ def parse_s9code(dbcursor,dbparmstyle,tempdir):
 		if status == "Allocated (Closed Range)":
 			numlength=[ 9, "0+9" ]
 
-		dbcursor.execute(stm, (number,operator.decode("iso-8859-1"),numlength[0],numlength[1],allocated,protected,designated,free,newdate,change,notes.decode("iso-8859-1"),tariffnotes.decode("iso-8859-1")))
+		dbcursor.execute(stm, (number,operator,numlength[0],numlength[1],allocated,protected,designated,free,newdate,change,notes,tariffnotes))
 
 def parse_sabc(dbcursor,dbparmstyle,tempdir):
 	print "Processing sabc.txt..."
