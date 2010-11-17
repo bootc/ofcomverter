@@ -345,8 +345,6 @@ def print_help():
 
 def main():
 
-	print number_of_digits("+10");
-
 	try:
 		options,arguments = getopt.getopt(sys.argv[1:],'ch:d:n:u:p:h:U:w:q')
 	except getopt.GetoptError, error:
