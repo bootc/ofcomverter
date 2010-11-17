@@ -270,6 +270,8 @@ def number_of_digits(mynumberlength):
 	if newnumberlength == "":
 		return [0,""]
 	for j in newnumberlength.split('+'):
+		if j == "":
+			j="0"
 		totalnumberlength=totalnumberlength + int(j)
 	return [totalnumberlength,newnumberlength]
 
@@ -318,7 +320,7 @@ def create_db_sqlite(myhandle):
 	myhandle.execute("CREATE TABLE locations (code text NOT NULL, location text, designated integer default NULL, notes text, date text)")
 
 def print_banner():
-	print "Ofcomverter Version 1.0.0beta5"
+	print "Ofcomverter Version 1.0.0beta6"
 	print "Copyright (C) 2008-2010 Gary Hawkins <gary.hawkins@garyhawkins.me.uk> and"
 	print "others -- see CREDITS file for details"
 	print ""
@@ -342,6 +344,8 @@ def print_help():
 ##################################################################################################
 
 def main():
+
+	print number_of_digits("+10");
 
 	try:
 		options,arguments = getopt.getopt(sys.argv[1:],'ch:d:n:u:p:h:U:w:q')
