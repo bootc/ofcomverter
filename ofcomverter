@@ -2,7 +2,7 @@
 
 #############################################################################
 # Ofcomverter
-# Copyright (C) 2008 Gary Hawkins <gary.hawkins@garysoft.co.uk> and
+# Copyright (C) 2008 Gary Hawkins <gary.hawkins@garyhawkins.me.uk> and
 # others, see CREDITS file
 #
 # This program is free software: you can redistribute it and/or modify
@@ -29,7 +29,7 @@ import zipfile
 import shutil
 
 try:
-	from pyPgSQL import PgSQL
+	import psycopg2
 	db_pgsql=True
 except ImportError:
 	db_pgsql=False
@@ -296,7 +296,7 @@ def connect_to_db(mydbtype,mydbhost,mydbport,mydbname,mydbusername,mydbpassword)
 		elif mydbtype=="sqlite":
 			return sqlite.connect(mydbname)
 		else:
-			cx = PgSQL.connect(host=mydbhost,database=mydbname,user=mydbusername,password=mydbpassword,port=mydbport,client_encoding="utf-8",unicode_results=1)
+			cx = psycopg2.connect(host=mydbhost,dbname=mydbname,user=mydbusername,password=mydbpassword,port=mydbport,client_encoding="utf-8")
 			cu = cx.cursor()
 			cu.execute("SET client_encoding TO unicode")
 			return cx
@@ -306,7 +306,7 @@ def connect_to_db(mydbtype,mydbhost,mydbport,mydbname,mydbusername,mydbpassword)
 		elif mydbtype=="sqlite":
 			return sqlite.connect(mydbname)
 		else:
-			cx = PgSQL.connect(host=mydbhost,database=mydbname,user=mydbusername,password=mydbpassword,client_encoding="utf-8",unicode_results=1)
+			cx = psycopg2.connect(host=mydbhost,dbname=mydbname,user=mydbusername,password=mydbpassword,client_encoding="utf-8")
 			cu = cx.cursor()
 			cu.execute("SET client_encoding TO unicode")
 			return cx
@@ -320,7 +320,7 @@ def create_db_sqlite(myhandle):
 	myhandle.execute("CREATE TABLE locations (code text NOT NULL, location text, designated integer default NULL, notes text, date text)")
 
 def print_banner():
-	print "Ofcomverter Version 1.0.0beta6"
+	print "Ofcomverter Version 1.0.0beta7"
 	print "Copyright (C) 2008-2010 Gary Hawkins <gary.hawkins@garyhawkins.me.uk> and"
 	print "others -- see CREDITS file for details"
 	print ""
@@ -390,10 +390,10 @@ def main():
 
 	if dbtype=="pgsql":
 		if db_pgsql != True:
-			print "Database pgsql not available. Please install pyPgSQL."
+			print "Database pgsql not available. Please install psycopg2."
 			sys.exit(0)
 		else:
-			dbparmstyle = PgSQL.paramstyle
+			dbparmstyle = psycopg2.paramstyle
 	elif dbtype=="mysql":
 		if db_mysql != True:
 			print "Database mysql not available. Please install MySQLdb."
