@@ -23,7 +23,7 @@ import getopt
 import sys
 import os
 import string
-from pyPgSQL import PgSQL
+import psycopg2
 import MySQLdb
 
 def connect_to_db(mydbtype,mydbhost,mydbport,mydbname,mydbusername,mydbpassword):
@@ -31,16 +31,16 @@ def connect_to_db(mydbtype,mydbhost,mydbport,mydbname,mydbusername,mydbpassword)
 		if mydbtype=="mysql":
 			return MySQLdb.connect(host=mydbhost,db=mydbname,user=mydbusername,passwd=mydbpassword,port=mydbport)
 		else:
-			return PgSQL.connect(host=mydbhost,database=mydbname,user=mydbusername,password=mydbpassword,port=mydbport)
+			return psycopg2.connect(host=mydbhost,database=mydbname,user=mydbusername,password=mydbpassword,port=mydbport)
 	else:
 		if mydbtype=="mysql":
 			return MySQLdb.connect(host=mydbhost,db=mydbname,user=mydbusername,passwd=mydbpassword)
 		else:
-			return PgSQL.connect(host=mydbhost,database=mydbname,user=mydbusername,password=mydbpassword)
+			return psycopg2.connect(host=mydbhost,database=mydbname,user=mydbusername,password=mydbpassword)
 			
 def print_banner():
-	sys.stderr.write("generate_dialplan version 1.0.0beta1\n")
-	sys.stderr.write("Copyright (C) 2008 Gary Hawkins <gary.hawkins@garyhawkins.me.uk>\n")
+	sys.stderr.write("generate_dialplan version 1.0.0beta8\n")
+	sys.stderr.write("Copyright (C) 2008-2012 Gary Hawkins <gary.hawkins@garyhawkins.me.uk>\n")
 	sys.stderr.write("and others -- see CREDITS file for details\n")
 	sys.stderr.write("\n")
 	sys.stderr.write("This program is free software, licensed under the terms of the\n")

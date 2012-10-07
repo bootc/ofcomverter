@@ -320,8 +320,8 @@ def create_db_sqlite(myhandle):
 	myhandle.execute("CREATE TABLE locations (code text NOT NULL, location text, designated integer default NULL, notes text, date text)")
 
 def print_banner():
-	print "Ofcomverter Version 1.0.0beta7"
-	print "Copyright (C) 2008-2010 Gary Hawkins <gary.hawkins@garyhawkins.me.uk> and"
+	print "Ofcomverter Version 1.0.0beta8"
+	print "Copyright (C) 2008-2012 Gary Hawkins <gary.hawkins@garyhawkins.me.uk> and"
 	print "others -- see CREDITS file for details"
 	print ""
 	print "This program is free software, licensed under the terms of the"
